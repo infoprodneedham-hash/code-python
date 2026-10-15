@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pythonic: Python for Web & Scripting Novices</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Pyodide WebAssembly for real client-side Python execution -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'Consolas', 'Menlo', 'monospace'],
+          },
+          colors: {
+            term: {
+              bg: '#0d1117',
+              header: '#161b22',
+              border: '#30363d',
+              accent: '#38bdf8',
+              green: '#2ea043',
+              amber: '#d29922',
+              red: '#f85149'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    
+    .editor-line-numbers {
+      counter-reset: line;
+    }
+    .editor-line-numbers div::before {
+      counter-increment: line;
+      content: counter(line);
+      display: inline-block;
+      width: 2.2rem;
+      text-align: right;
+      color: #475569;
+      margin-right: 0.85rem;
+      user-select: none;
+    }
+    .glow-accent {
+      box-shadow: 0 0 15px -3px rgba(56, 189, 248, 0.25);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans h-full flex flex-col overflow-hidden">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md text-base">
+          Py
+        </div>
+        <div>
+          <h1 class="text-sm font-semibold tracking-wide text-white flex items-center gap-2">
+            Pythonic 
+            <span class="text-xs px-2 py-0.5 rounded-full bg-sky-950 text-sky-400 border border-sky-800 font-normal">
+              For JS / PHP / VB Novices
+            </span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Interactive WebAssembly Sandbox & Rosetta Stone</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Engine Status Indicator -->
+    <div class="hidden md:flex items-center gap-3 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
+      <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></div>
+      <span id="engineStatusText" class="text-slate-300">Initializing Python Engine (Pyodide WASM)...</span>
+      <span id="wasmBadge" class="bg-slate-800 text-slate-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-mono">WASM 3.12</span>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2">
+      <!-- Quick Snippets Menu -->
+      <select id="snippetPicker" class="bg-slate-800 hover:bg-slate-750 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-sky-500">
+        <option value="" disabled selected>⚡ Quick Real-World Snippets</option>
+        <option value="dataFilter">CSV / Record Filter Demo</option>
+        <option value="statsCalc">Quick Stats & Average</option>
+        <option value="dictLookup">API Mock JSON Transformation</option>
+        <option value="stringFormat">Modern F-String Showcase</option>
+      </select>
+
+      <button id="toggleRosettaBtn" class="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-750 text-sky-400 border border-slate-700 hover:border-sky-500/50 px-2.5 py-1.5 rounded-lg transition-all" title="Toggle JS/PHP/VB Comparison Panel">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        <span class="hidden sm:inline">Rosetta Stone</span>
+      </button>
+
+      <button id="runCodeBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium text-xs px-4 py-1.5 rounded-lg shadow flex items-center gap-1.5 transition-all active:scale-95 glow-accent">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span>Run Code</span>
+        <span class="hidden lg:inline text-[10px] opacity-75 font-mono">(Ctrl+↵)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body Area -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Left Sidebar: Lessons Roadmap -->
+    <aside class="w-64 bg-slate-900/90 border-r border-slate-800 flex flex-col shrink-0 hidden md:flex">
+      <div class="p-3 border-b border-slate-800/80 flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Interactive Lessons</span>
+        <span id="lessonProgressBadge" class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-mono">0/8 Done</span>
+      </div>
+
+      <nav id="lessonsContainer" class="flex-1 overflow-y-auto p-2 space-y-1 text-xs">
+        <!-- Lessons generated via JS -->
+      </nav>
+
+      <!-- Novice Tip Footer -->
+      <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-[11px] text-slate-400">
+        <div class="flex items-center gap-1 text-sky-400 font-medium mb-1">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+          Python Golden Rule
+        </div>
+        Indentation defines structure. 4 spaces = 1 tab. No trailing semicolons!
+      </div>
+    </aside>
+
+    <!-- Center & Right Panes Container -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      
+      <!-- Top Mobile Lesson Bar -->
+      <div class="md:hidden bg-slate-900 border-b border-slate-800 p-2 flex items-center justify-between">
+        <select id="mobileLessonSelect" class="bg-slate-800 text-xs text-white rounded p-1.5 w-full border border-slate-700">
+          <!-- Populated in JS -->
+        </select>
+      </div>
+
+      <!-- Rosetta Stone Drawer (Side-by-side JS / PHP / VB comparison) -->
+      <div id="rosettaPanel" class="bg-slate-900 border-b border-slate-800 p-3 transition-all duration-300">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase text-sky-400 tracking-wider flex items-center gap-1.5">
+              <span>🌐</span> The Rosetta Stone: Syntax Comparison
+            </span>
+            <span class="text-[11px] text-slate-400" id="rosettaTopic">Topic: Syntax & Variables</span>
+          </div>
+          <button id="closeRosettaBtn" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs font-mono">
+          <div class="bg-slate-950 p-2 rounded border border-slate-800">
+            <div class="text-[11px] font-semibold text-yellow-400 mb-1 font-sans flex items-center justify-between">
+              <span>JavaScript (ES6)</span>
+              <span class="text-slate-500 font-mono text-[10px]">Browser / Node</span>
+            </div>
+            <pre id="rosettaJS" class="text-slate-300 overflow-x-auto text-[11px] leading-relaxed">// JavaScript</pre>
+          </div>
+          <div class="bg-slate-950 p-2 rounded border border-slate-800">
+            <div class="text-[11px] font-semibold text-indigo-400 mb-1 font-sans flex items-center justify-between">
+              <span>PHP / Visual Basic</span>
+              <span class="text-slate-500 font-mono text-[10px]">Server / Classic</span>
+            </div>
+            <pre id="rosettaPHP" class="text-slate-300 overflow-x-auto text-[11px] leading-relaxed">// PHP or VB</pre>
+          </div>
+          <div class="bg-slate-950 p-2 rounded border border-sky-900/60 bg-sky-950/20">
+            <div class="text-[11px] font-semibold text-sky-400 mb-1 font-sans flex items-center justify-between">
+              <span>Python 3 (Modern)</span>
+              <span class="text-emerald-400 font-mono text-[10px]">Clean & Direct</span>
+            </div>
+            <pre id="rosettaPy" class="text-emerald-300 overflow-x-auto text-[11px] leading-relaxed"># Python equivalent</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split Code & Preview Area -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0 overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-slate-800">
+        
+        <!-- Left Pane: Code Editor -->
+        <div class="flex flex-col bg-slate-950 min-h-0">
+          <!-- Editor Titlebar -->
+          <div class="bg-slate-900/80 px-3 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+              <span id="currentLessonTitle" class="text-xs font-semibold text-slate-200">main.py</span>
+              <span class="text-[11px] text-slate-500 font-mono">(Python 3)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button id="resetCodeBtn" class="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition" title="Reset back to lesson starter code">
+                Reset
+              </button>
+              <button id="copyCodeBtn" class="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 transition" title="Copy code to clipboard">
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <!-- Lesson Context / Explanation Accordion Banner -->
+          <div id="lessonDescriptionBanner" class="bg-slate-900/40 border-b border-slate-800 px-3 py-2 text-xs text-slate-300 shrink-0 flex items-start gap-2">
+            <div class="text-sky-400 mt-0.5 font-bold">💡</div>
+            <div class="flex-1">
+              <div id="lessonSummary" class="font-medium text-slate-200 mb-0.5">Lesson Context</div>
+              <div id="lessonExplanation" class="text-slate-400 text-[11.5px] leading-relaxed">Explanation text appears here.</div>
+            </div>
+          </div>
+
+          <!-- Code Input Workspace -->
+          <div class="flex-1 flex overflow-hidden relative font-mono text-sm">
+            <!-- Line numbers display -->
+            <div id="lineNumbers" class="w-10 bg-slate-900/40 text-slate-600 select-none py-3 text-right pr-2 font-mono text-xs border-r border-slate-800/80 select-none hidden sm:block overflow-hidden leading-6">
+              1<br>2<br>3<br>4<br>5
+            </div>
+            <!-- Interactive Textarea -->
+            <textarea id="codeEditor" spellcheck="false" class="flex-1 bg-transparent text-slate-100 p-3 outline-none resize-none overflow-y-auto leading-6 whitespace-pre font-mono text-xs sm:text-sm selection:bg-sky-900 selection:text-white" placeholder="# Write your Python code here..."></textarea>
+          </div>
+
+          <!-- Bottom Editor Action Bar -->
+          <div class="bg-slate-900/90 border-t border-slate-800 px-3 py-1.5 flex items-center justify-between text-xs text-slate-400 shrink-0">
+            <div class="flex items-center gap-3">
+              <span>Lines: <strong id="lineCount" class="text-slate-200">0</strong></span>
+              <span>Chars: <strong id="charCount" class="text-slate-200">0</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-500">Auto-indents 4 spaces with Tab</span>
+              <button id="markCompleteBtn" class="text-[11px] bg-slate-800 hover:bg-sky-900 hover:text-sky-200 text-slate-300 px-2 py-0.5 rounded border border-slate-700 transition">
+                ✓ Mark Lesson Complete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Pane: Terminal / Output Preview -->
+        <div class="flex flex-col bg-slate-950 min-h-0">
+          
+          <!-- Terminal Window Header -->
+          <div class="bg-slate-900/90 px-3 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+              <!-- Window dots -->
+              <div class="flex items-center gap-1.5 mr-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+              </div>
+              <span class="text-xs font-semibold text-slate-300 font-mono">Terminal Output & stdout</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="execTimer" class="text-[11px] text-slate-500 font-mono hidden">0.00s</span>
+              <button id="clearTerminalBtn" class="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-750 transition">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Console Terminal Output Window -->
+          <div id="terminalWindow" class="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2 leading-relaxed bg-[#0b0f17]">
+            <div class="text-slate-500 select-none">
+              Python 3.12.x interactive WebAssembly sandbox initialized.<br>
+              Type your code in the left editor and hit <span class="text-sky-400 font-semibold">[Run Code]</span> or press <kbd class="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Ctrl + Enter</kbd>.
+            </div>
+          </div>
+
+          <!-- Structured Result / Return Value Inspector -->
+          <div id="inspectorPanel" class="bg-slate-900/90 border-t border-slate-800 px-3 py-2.5 shrink-0">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <span>🔍</span> Last Evaluated Return Value
+              </span>
+              <span id="returnTypeBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">None</span>
+            </div>
+            <div id="inspectorOutput" class="font-mono text-xs text-sky-300 bg-slate-950 p-2 rounded border border-slate-800 overflow-x-auto truncate">
+              None
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Input Modal (for Python input() calls) -->
+  <div id="inputModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-md w-full shadow-2xl">
+      <div class="flex items-center gap-2 text-sky-400 font-semibold text-sm mb-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Python `input()` Requested:
+      </div>
+      <p id="inputPromptText" class="text-xs text-slate-300 mb-3 bg-slate-950 p-2.5 rounded border border-slate-800 font-mono"></p>
+      <input type="text" id="modalInputBox" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded p-2 text-sm text-white outline-none font-mono mb-3" placeholder="Type your input and press Enter...">
+      <div class="flex justify-end gap-2">
+        <button id="modalSubmitBtn" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-4 py-2 rounded-lg font-medium transition">Submit Value</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic Application -->
+  <script>
+    // --- LESSON CURRICULUM ---
+    const LESSONS = [
+      {
+        id: "syntax-basics",
+        title: "1. No Braces or Semicolons",
+        shortDesc: "Python uses indentation (4 spaces) instead of { } brackets, and no semicolons.",
+        explanation: "In JavaScript, PHP, or Basic, you used semicolons or curly braces to define boundaries. In Python, readable whitespace rules: indent lines 4 spaces to place them inside a block.",
+        rosetta: {
+          topic: "Syntax, Indentation & Semicolons",
+          js: `// JavaScript\nfunction greet(name) {\n    if (name) {\n        console.log("Hello, " + name);\n    }\n}\ngreet("Coder");`,
+          php: `// PHP\nfunction greet($name) {\n    if ($name) {\n        echo "Hello, " . $name . "\\n";\n    }\n}\ngreet("Coder");`,
+          py: `# Python: Clean, readable, no semicolons\ndef greet(name):\n    if name:\n        print(f"Hello, {name}")\n\ngreet("Coder")`
+        },
+        starterCode: `# Lesson 1: Clean syntax and indentation
+# Notice: No semicolons at the end of lines!
+# Notice: Colons (:) declare the start of an indented block.
+
+user_name = "Tech Pioneer"
+years_coding = 1
+
+print("--- Welcome to Python ---")
+
+if years_coding > 0:
+    print(f"Welcome back, {user_name}!")
+    print("In Python, lines grouped with 4 spaces belong together.")
+else:
+    print("Welcome to your very first coding journey!")
+
+print("This line is unindented, so it runs after the if-block finishes.")
+`
+      },
+      {
+        id: "variables-fstrings",
+        title: "2. Variables & F-Strings",
+        shortDesc: "Dynamic typing and powerful string interpolation with f'Hello {var}'.",
+        explanation: "Python variables do not need 'let', 'const', 'var', or '$'. To format strings, modern Python uses f-strings: prefix with 'f' and write variables right inside {curly braces}.",
+        rosetta: {
+          topic: "Variable Declaration & String Interpolation",
+          js: `// JavaScript\nconst item = "Monitor";\nlet price = 249.99;\nconsole.log(\`Item: \${item}, Cost: $\${price.toFixed(2)}\`);`,
+          php: `// PHP\n$item = "Monitor";\n$price = 249.99;\necho "Item: $item, Cost: $" . number_format($price, 2);`,
+          py: `# Python\nitem = "Monitor"\nprice = 249.99\nprint(f"Item: {item}, Cost: \${price:.2f}")`
+        },
+        starterCode: `# Lesson 2: Variables & F-Strings
+product = "Mechanical Keyboard"
+price = 119.50
+quantity = 3
+in_stock = True  # Notice capital 'True' and 'False'!
+
+# Calculate total
+total_cost = price * quantity
+
+# Modern Python F-Strings format expressions directly:
+print(f"Order Summary for: {product}")
+print(f"Unit Price:   \${price:.2f}")
+print(f"Quantity:     {quantity}")
+print(f"Total Bill:   \${total_cost:.2f}")
+print(f"Stock Status: {'Available for dispatch' if in_stock else 'Backordered'}")
+`
+      },
+      {
+        id: "lists-dicts",
+        title: "3. Lists & Dictionaries",
+        shortDesc: "Lists are like JS arrays. Dictionaries are like JSON objects or PHP associative arrays.",
+        explanation: "Python's `list` = JavaScript Array `[]`. Python's `dict` = JavaScript Object `{}` or PHP associative array. Python also has 'list comprehensions' to filter and transform lists in one line.",
+        rosetta: {
+          topic: "Collections: Arrays vs Lists, Objects vs Dicts",
+          js: `// JS: Array & Object\nconst fruits = ["Apple", "Berry"];\nfruits.push("Cherry");\n\nconst user = { name: "Sam", age: 28 };\nconsole.log(user.name);`,
+          php: `// PHP: Associative Array\n$fruits = ["Apple", "Berry"];\narray_push($fruits, "Cherry");\n\n$user = ["name" => "Sam", "age" => 28];\necho $user["name"];`,
+          py: `# Python: List & Dict\nfruits = ["Apple", "Berry"]\nfruits.append("Cherry")\n\nuser = {"name": "Sam", "age": 28}\nprint(user["name"])`
+        },
+        starterCode: `# Lesson 3: Lists (arrays) and Dictionaries (objects/key-value)
+
+# 1. A list of server names
+servers = ["web-01", "web-02", "db-primary", "cache-redis"]
+servers.append("worker-queue")
+
+print("All Servers:", servers)
+print("First Server:", servers[0])
+print("Last Server (negative index!):", servers[-1])
+
+# 2. A dictionary (key -> value)
+server_health = {
+    "hostname": "web-01",
+    "cpu_usage_pct": 42.5,
+    "active": True,
+    "roles": ["http", "ssl-termination"]
+}
+
+print(f"\\nServer {server_health['hostname']} CPU: {server_health['cpu_usage_pct']}%")
+
+# 3. Superpower: List Comprehension (transforms or filters)
+# Like JavaScript's .map() and .filter() rolled into one concise line:
+upper_servers = [s.upper() for s in servers if "web" in s]
+print("Web-only uppercase list:", upper_servers)
+`
+      },
+      {
+        id: "conditionals",
+        title: "4. Conditionals & 'elif'",
+        shortDesc: "True/False capitalization, 'and' / 'or' / 'not' keywords, and 'elif'.",
+        explanation: "Instead of 'else if', Python uses 'elif'. Instead of '&&' and '||', Python literally uses the English words 'and', 'or', and 'not'. True and False must be Capitalized.",
+        rosetta: {
+          topic: "Conditionals & Logical Operators",
+          js: `// JavaScript\nif (age >= 18 && hasID) {\n    status = "Approved";\n} else if (!hasID) {\n    status = "Need ID";\n} else {\n    status = "Denied";\n}`,
+          php: `// PHP\nif ($age >= 18 && $hasID) {\n    $status = "Approved";\n} elseif (!$hasID) {\n    $status = "Need ID";\n} else {\n    $status = "Denied";\n}`,
+          py: `# Python\nif age >= 18 and has_id:\n    status = "Approved"\nelif not has_id:\n    status = "Need ID"\nelse:\n    status = "Denied"`
+        },
+        starterCode: `# Lesson 4: Conditionals and Logic
+
+score = 87
+has_bonus_credits = True
+
+# In Python: 'and', 'or', 'not' replace '&&', '||', '!'
+if score >= 90 or (score >= 85 and has_bonus_credits):
+    grade = "A (Distinction)"
+elif score >= 80:
+    grade = "B"
+elif score >= 70:
+    grade = "C"
+else:
+    grade = "Review Required"
+
+print(f"Final Student Score: {score}")
+print(f"Assigned Grade: {grade}")
+
+# Python also has 'in' keyword for membership checking:
+allowed_roles = ["admin", "editor", "moderator"]
+current_user_role = "editor"
+
+if current_user_role in allowed_roles:
+    print(f"Access granted for role: '{current_user_role}'")
+`
+      },
+      {
+        id: "loops",
+        title: "5. Loops & Iteration",
+        shortDesc: "For...in loops, range(start, stop), and the enumerate() helper.",
+        explanation: "In Python, loops don't require `(let i=0; i < len; i++)`. You iterate directly over lists, or use `range()` for counting, and `enumerate()` when you also want the index number.",
+        rosetta: {
+          topic: "Loops & Counting",
+          js: `// JavaScript\nfor (let i = 0; i < 3; i++) {\n    console.log(i);\n}\nconst items = ["a", "b"];\nitems.forEach((item, idx) => console.log(idx, item));`,
+          php: `// PHP\nfor ($i = 0; $i < 3; $i++) {\n    echo $i;\n}\n$items = ["a", "b"];\nforeach ($items as $idx => $item) {\n    echo "$idx: $item\\n";\n}`,
+          py: `# Python\nfor i in range(3):\n    print(i)\nitems = ["a", "b"]\nfor idx, item in enumerate(items):\n    print(f"{idx}: {item}")`
+        },
+        starterCode: `# Lesson 5: Loops made elegant
+
+print("--- 1. Loop 5 times with range() ---")
+for count in range(1, 6):
+    print(f"Step #{count}")
+
+print("\\n--- 2. Loop directly over items ---")
+devices = ["Router", "Switch", "Firewall", "Access Point"]
+for device in devices:
+    print(f"Checking hardware: {device}... OK")
+
+print("\\n--- 3. Need the index count too? Use enumerate() ---")
+for index, device in enumerate(devices, start=1):
+    print(f"{index}. {device}")
+
+print("\\n--- 4. Looping through a Dictionary ---")
+metrics = {"cpu": "12%", "ram": "4.2GB", "uptime": "14 days"}
+for key, value in metrics.items():
+    print(f"• {key.upper()}: {value}")
+`
+      },
+      {
+        id: "functions",
+        title: "6. Functions & Multiple Returns",
+        shortDesc: "Defined with 'def', optional default parameters, and unpacking multiple return values.",
+        explanation: "Functions start with `def`. Unlike many languages where returning multiple values requires creating an object, Python natively allows returning commas: `return min_val, max_val`.",
+        rosetta: {
+          topic: "Function Declaration & Return",
+          js: `// JavaScript\nfunction calculateTax(subtotal, rate = 0.08) {\n    const tax = subtotal * rate;\n    return { tax, total: subtotal + tax };\n}`,
+          php: `// PHP\nfunction calculateTax($subtotal, $rate = 0.08) {\n    $tax = $subtotal * $rate;\n    return ["tax" => $tax, "total" => $subtotal + $tax];\n}`,
+          py: `# Python: Native multiple returns & default args\ndef calculate_tax(subtotal, rate=0.08):\n    tax = subtotal * rate\n    return tax, subtotal + tax  # Returns tuple`
+        },
+        starterCode: `# Lesson 6: Functions & Multiple Returns
+
+# Default argument: tax_rate is optional, defaults to 0.07 (7%)
+def process_invoice(client, amount, tax_rate=0.07):
+    """Calculates sales tax and returns subtotal, tax, and final amount."""
+    tax = amount * tax_rate
+    final_total = amount + tax
+    
+    # Python can return MULTIPLE values separated by commas!
+    return tax, final_total
+
+# Unpack multiple returned values in one clean line:
+tax_due, grand_total = process_invoice("Acme Corp", 500.00)
+
+print(f"Client: Acme Corp")
+print(f"Tax Calculated: \${tax_due:.2f}")
+print(f"Total Amount:   \${grand_total:.2f}")
+
+# Example 2: Keyword arguments (order doesn't matter when named)
+tax_due2, grand_total2 = process_invoice(tax_rate=0.10, amount=250.0, client="Globex")
+print(f"\\nGlobex Total (at 10%): \${grand_total2:.2f}")
+`
+      },
+      {
+        id: "csv-parsing",
+        title: "7. Automation: CSV Data Processing",
+        shortDesc: "Why Python is famed for automation: built-in parsing and data summarization.",
+        explanation: "Python includes built-in modules like `csv`, `json`, `math`, and `datetime`. Without installing anything external, you can slice through spreadsheet-like records in few lines.",
+        rosetta: {
+          topic: "Built-in Standard Library vs Extra Packages",
+          js: `// JavaScript (Node requires external npm pkg like 'csv-parser')\n// const csv = require('csv-parser');`,
+          php: `// PHP has fgetcsv(), but requires file pointer handling\n// $handle = fopen("data.csv", "r");`,
+          py: `# Python has batteries included:\nimport csv\nimport math\nfrom datetime import date`
+        },
+        starterCode: `# Lesson 7: Automating Data & Parsing CSV strings
+import csv
+import io
+
+# Simulated CSV data (like an exported user or sales report)
+csv_data = """Name,Department,Salary,Performance
+Sarah Connor,Engineering,95000,4.8
+John Doe,Marketing,62000,3.9
+Elena Rostova,Engineering,105000,4.9
+Marcus Vance,Support,48000,4.2
+Liam Smith,Engineering,88000,4.5
+"""
+
+# Read the CSV directly using Python's standard csv module:
+reader = csv.DictReader(io.StringIO(csv_data.strip()))
+employees = list(reader)
+
+print(f"Loaded {len(employees)} employee records.\\n")
+
+# Let's automate an engineering salary report:
+eng_salaries = []
+
+print("--- Engineering Department ---")
+for emp in employees:
+    if emp["Department"] == "Engineering":
+        salary = float(emp["Salary"])
+        eng_salaries.append(salary)
+        print(f"• {emp['Name']:15} | \${salary:,.2f} | Rating: {emp['Performance']}")
+
+avg_eng_salary = sum(eng_salaries) / len(eng_salaries)
+print(f"\\nAverage Engineering Salary: \${avg_eng_salary:,.2f}")
+`
+      },
+      {
+        id: "apis-json",
+        title: "8. Web APIs & JSON Manipulation",
+        shortDesc: "Working with JSON data structures, nested lookups, and Python dictionaries.",
+        explanation: "Python translates JSON natively into nested dictionaries and lists using `json.loads()` and `json.dumps()`. Navigating JSON feels identical to working with native Python code.",
+        rosetta: {
+          topic: "JSON Parsing and Serialization",
+          js: `// JavaScript\nconst jsonStr = '{"status": 200, "data": [1, 2]}';\nconst parsed = JSON.parse(jsonStr);\nconst output = JSON.stringify(parsed, null, 2);`,
+          php: `// PHP\n$jsonStr = '{"status": 200, "data": [1, 2]}';\n$parsed = json_decode($jsonStr, true);\n$output = json_encode($parsed, JSON_PRETTY_PRINT);`,
+          py: `# Python\nimport json\njson_str = '{"status": 200, "data": [1, 2]}'\nparsed = json.loads(json_str)\noutput = json.dumps(parsed, indent=2)`
+        },
+        starterCode: `# Lesson 8: Processing JSON API Responses
+import json
+
+# Simulated response payload from a Weather API
+api_response = """
+{
+  "location": "Melbourne, Australia",
+  "forecast_days": 3,
+  "daily": [
+    {"day": "Monday", "temp_c": 22.4, "condition": "Sunny", "wind_kmh": 14},
+    {"day": "Tuesday", "temp_c": 18.0, "condition": "Rain showers", "wind_kmh": 28},
+    {"day": "Wednesday", "temp_c": 26.5, "condition": "Clear", "wind_kmh": 9}
+  ],
+  "meta": {"cached": true, "timestamp": 1729000000}
+}
+"""
+
+# Parse JSON into a native Python dictionary:
+data = json.loads(api_response)
+
+print(f"Forecast for: {data['location']}")
+print("-" * 40)
+
+for item in data["daily"]:
+    # Quick visual indicator based on condition
+    icon = "☀️" if "Sunny" in item["condition"] or "Clear" in item["condition"] else "🌧️"
+    print(f"{icon} {item['day']:9} | {item['temp_c']}°C | {item['condition']} (Wind: {item['wind_kmh']} km/h)")
+
+# Find the warmest day using Python's max() key function:
+hottest_day = max(data["daily"], key=lambda d: d["temp_c"])
+print("-" * 40)
+print(f"Warmest day will be {hottest_day['day']} peaking at {hottest_day['temp_c']}°C!")
+`
+      }
+    ];
+
+    // --- QUICK REAL-WORLD CODE TEMPLATES ---
+    const SNIPPETS = {
+      dataFilter: `# Quick Demo: Filter & Transform Records
+users = [
+    {"name": "Alice", "role": "admin", "active": True},
+    {"name": "Bob", "role": "subscriber", "active": False},
+    {"name": "Charlie", "role": "admin", "active": True},
+    {"name": "Dave", "role": "editor", "active": True}
+]
+
+# Find active admins using a 1-line list comprehension
+active_admins = [u["name"] for u in users if u["role"] == "admin" and u["active"]]
+print("Active Admins:", active_admins)
+`,
+      statsCalc: `# Quick Demo: Math & Statistics
+scores = [78, 92, 85, 96, 64, 88, 91, 74]
+
+total = sum(scores)
+average = total / len(scores)
+highest = max(scores)
+lowest = min(scores)
+
+print(f"Sample Size: {len(scores)}")
+print(f"Average:     {average:.1f}")
+print(f"Range:       {lowest} to {highest}")
+`,
+      dictLookup: `# Quick Demo: Safe Dictionary Lookups
+# In Python, accessing a missing key with dict['missing'] throws a KeyError.
+# Using .get() allows safe fallbacks (just like optional chaining in JS)!
+
+user_profile = {"username": "coder42", "verified": True}
+
+# Safely check preferences without crashing if missing:
+theme = user_profile.get("theme", "dark-mode (default)")
+notifications = user_profile.get("email_notify", False)
+
+print(f"Theme: {theme}")
+print(f"Notifications: {notifications}")
+`,
+      stringFormat: `# Quick Demo: F-String formatting power
+import math
+
+val = 1234.56789
+print(f"Currency:       \${val:,.2f}")
+print(f"Padded digits:  {42:05d}")
+print(f"Pi to 4 places: {math.pi:.4f}")
+print(f"Percentage:     {0.8425:.1%}")
+`
+    };
+
+    // --- APPLICATION STATE ---
+    let pyodideInstance = null;
+    let isPyodideLoading = true;
+    let currentLessonIdx = 0;
+    const completedLessons = new Set();
+
+    // DOM Elements
+    const codeEditor = document.getElementById('codeEditor');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const lineCountEl = document.getElementById('lineCount');
+    const charCountEl = document.getElementById('charCount');
+    const terminalWindow = document.getElementById('terminalWindow');
+    const runCodeBtn = document.getElementById('runCodeBtn');
+    const resetCodeBtn = document.getElementById('resetCodeBtn');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const clearTerminalBtn = document.getElementById('clearTerminalBtn');
+    const statusDot = document.getElementById('statusDot');
+    const engineStatusText = document.getElementById('engineStatusText');
+    const execTimer = document.getElementById('execTimer');
+    const returnTypeBadge = document.getElementById('returnTypeBadge');
+    const inspectorOutput = document.getElementById('inspectorOutput');
+    const lessonSummary = document.getElementById('lessonSummary');
+    const lessonExplanation = document.getElementById('lessonExplanation');
+    const currentLessonTitle = document.getElementById('currentLessonTitle');
+    const markCompleteBtn = document.getElementById('markCompleteBtn');
+    const lessonProgressBadge = document.getElementById('lessonProgressBadge');
+    const lessonsContainer = document.getElementById('lessonsContainer');
+    const mobileLessonSelect = document.getElementById('mobileLessonSelect');
+    const snippetPicker = document.getElementById('snippetPicker');
+    
+    // Rosetta Stone DOM
+    const rosettaPanel = document.getElementById('rosettaPanel');
+    const toggleRosettaBtn = document.getElementById('toggleRosettaBtn');
+    const closeRosettaBtn = document.getElementById('closeRosettaBtn');
+    const rosettaTopic = document.getElementById('rosettaTopic');
+    const rosettaJS = document.getElementById('rosettaJS');
+    const rosettaPHP = document.getElementById('rosettaPHP');
+    const rosettaPy = document.getElementById('rosettaPy');
+
+    // Input Modal DOM
+    const inputModal = document.getElementById('inputModal');
+    const inputPromptText = document.getElementById('inputPromptText');
+    const modalInputBox = document.getElementById('modalInputBox');
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    let inputResolver = null;
+
+    // --- PYODIDE WASM INITIALIZATION ---
+    async function initPyodideEngine() {
+      try {
+        if (typeof loadPyodide !== "undefined") {
+          pyodideInstance = await loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
+          });
+          
+          isPyodideLoading = false;
+          statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+          engineStatusText.textContent = "Python 3.12 (Pyodide WASM Ready)";
+          appendTerminalMessage("system", "✓ Pyodide WebAssembly engine loaded successfully. Real client-side Python execution active!");
+        } else {
+          throw new Error("Pyodide script failed to load from CDN.");
+        }
+      } catch (err) {
+        console.warn("Pyodide CDN fallback enabled:", err);
+        isPyodideLoading = false;
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        engineStatusText.textContent = "Python Engine Ready (Fallback Mode)";
+        appendTerminalMessage("system", "⚠️ Pyodide CDN was unreachable or offline. Fallback execution simulator is active.");
+      }
+    }
+
+    // --- LESSON NAVIGATION RENDERING ---
+    function renderLessonsList() {
+      lessonsContainer.innerHTML = "";
+      mobileLessonSelect.innerHTML = "";
+
+      LESSONS.forEach((lesson, idx) => {
+        const isDone = completedLessons.has(lesson.id);
+        const isActive = idx === currentLessonIdx;
+
+        // Desktop Sidebar Item
+        const item = document.createElement("button");
+        item.className = `w-full text-left p-2 rounded-lg flex items-start gap-2.5 transition-all ${
+          isActive 
+            ? "bg-sky-950/80 border border-sky-800 text-sky-200" 
+            : "hover:bg-slate-800/60 text-slate-300 border border-transparent"
+        }`;
+        
+        item.innerHTML = `
+          <span class="mt-0.5 text-xs ${isDone ? 'text-emerald-400 font-bold' : isActive ? 'text-sky-400' : 'text-slate-500'}">
+            ${isDone ? '✓' : (idx + 1)}
+          </span>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium truncate text-xs ${isActive ? 'text-white' : ''}">${lesson.title.split('. ')[1] || lesson.title}</div>
+            <div class="text-[10px] text-slate-400 truncate">${lesson.shortDesc}</div>
+          </div>
+        `;
+        item.onclick = () => loadLesson(idx);
+        lessonsContainer.appendChild(item);
+
+        // Mobile select option
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = `${isDone ? '✓ ' : ''}${lesson.title}`;
+        opt.selected = isActive;
+        mobileLessonSelect.appendChild(opt);
+      });
+
+      lessonProgressBadge.textContent = `${completedLessons.size}/${LESSONS.length} Done`;
+    }
+
+    // Load selected lesson into editor
+    function loadLesson(idx) {
+      currentLessonIdx = idx;
+      const lesson = LESSONS[idx];
+
+      currentLessonTitle.textContent = `${lesson.id}.py`;
+      lessonSummary.textContent = lesson.title;
+      lessonExplanation.textContent = lesson.explanation;
+      codeEditor.value = lesson.starterCode;
+
+      // Update Rosetta Stone
+      rosettaTopic.textContent = `Topic: ${lesson.rosetta.topic}`;
+      rosettaJS.textContent = lesson.rosetta.js;
+      rosettaPHP.textContent = lesson.rosetta.php;
+      rosettaPy.textContent = lesson.rosetta.py;
+
+      updateLineNumbers();
+      renderLessonsList();
+    }
+
+    // --- TERMINAL OUTPUT HELPERS ---
+    function appendTerminalMessage(type, text) {
+      const msgDiv = document.createElement("div");
+      
+      if (type === "system") {
+        msgDiv.className = "text-sky-400/90 text-[11px] font-sans italic border-l-2 border-sky-500 pl-2 my-1";
+        msgDiv.textContent = text;
+      } else if (type === "error") {
+        msgDiv.className = "text-rose-400 bg-rose-950/30 p-2.5 rounded border border-rose-900/60 my-1 whitespace-pre-wrap font-mono text-[11.5px]";
+        msgDiv.textContent = text;
+      } else {
+        msgDiv.className = "text-slate-100 whitespace-pre-wrap font-mono text-[12px] leading-5";
+        msgDiv.textContent = text;
+      }
+
+      terminalWindow.appendChild(msgDiv);
+      terminalWindow.scrollTop = terminalWindow.scrollHeight;
+    }
+
+    function clearTerminal() {
+      terminalWindow.innerHTML = "";
+      inspectorOutput.textContent = "None";
+      returnTypeBadge.textContent = "None";
+      execTimer.classList.add("hidden");
+    }
+
+    // --- PYTHON EXECUTION ENGINE (PYODIDE + FALLBACK) ---
+    async function executePythonCode() {
+      const code = codeEditor.value;
+      if (!code.trim()) {
+        appendTerminalMessage("system", "Code editor is empty. Enter some Python code to run.");
+        return;
+      }
+
+      runCodeBtn.disabled = true;
+      runCodeBtn.classList.add("opacity-60");
+      execTimer.classList.remove("hidden");
+      execTimer.textContent = "Running...";
+
+      const startTime = performance.now();
+
+      // Clear or add separator in terminal
+      appendTerminalMessage("system", `▶ Running code (${new Date().toLocaleTimeString()})...`);
+
+      try {
+        if (pyodideInstance) {
+          // 1. Python wrapper script to safely intercept stdout/stderr in WebAssembly
+          await pyodideInstance.runPythonAsync(`
+import sys
+import io
+
+class WebConsole(io.StringIO):
+    def __init__(self):
+        super().__init__()
+        self.outputs = []
+
+    def write(self, s):
+        if s:
+            self.outputs.append(s)
+        return len(s)
+
+__sys_stdout_buf = WebConsole()
+__sys_stderr_buf = WebConsole()
+sys.stdout = __sys_stdout_buf
+sys.stderr = __sys_stderr_buf
+`);
+
+          // 2. Execute user code
+          let result = await pyodideInstance.runPythonAsync(code);
+
+          // 3. Extract captured stdout & stderr
+          const stdoutList = pyodideInstance.runPython("__sys_stdout_buf.outputs.copy()").toJs();
+          const stderrList = pyodideInstance.runPython("__sys_stderr_buf.outputs.copy()").toJs();
+
+          // Reset buffers
+          pyodideInstance.runPython("__sys_stdout_buf.outputs.clear(); __sys_stderr_buf.outputs.clear()");
+
+          const stdoutText = stdoutList.join("");
+          const stderrText = stderrList.join("");
+
+          if (stdoutText) {
+            appendTerminalMessage("stdout", stdoutText);
+          }
+
+          if (stderrText) {
+            appendTerminalMessage("error", stderrText);
+          }
+
+          if (!stdoutText && !stderrText && result === undefined) {
+            appendTerminalMessage("system", "(Code executed successfully with no print output).");
+          }
+
+          // Evaluate return value inspector
+          if (result !== undefined) {
+            const resultStr = String(result);
+            inspectorOutput.textContent = resultStr;
+            returnTypeBadge.textContent = typeof result;
+          } else {
+            inspectorOutput.textContent = "None";
+            returnTypeBadge.textContent = "None / void";
+          }
+
+        } else {
+          // Fallback simulation (lightweight mock executor if Pyodide CDN is blocked)
+          await simulatePythonExecution(code);
+        }
+
+      } catch (err) {
+        // Clean up common Python syntax error displays for beginners
+        appendTerminalMessage("error", `Traceback (most recent call last):\n${err.message || err}`);
+        inspectorOutput.textContent = "Error during execution";
+        returnTypeBadge.textContent = "Exception";
+      } finally {
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+        execTimer.textContent = `${elapsed}s`;
+        runCodeBtn.disabled = false;
+        runCodeBtn.classList.remove("opacity-60");
+      }
+    }
+
+    // Fallback simulation if WASM is offline
+    async function simulatePythonExecution(code) {
+      await new Promise(r => setTimeout(r, 200));
+      const printRegex = /print\((.*?)\)/g;
+      let match;
+      let captured = [];
+
+      while ((match = printRegex.exec(code)) !== null) {
+        let inside = match[1].trim();
+        // Simple strip of f-string quotes for fallback preview
+        if (inside.startsWith('f"') || inside.startsWith("f'")) {
+          inside = inside.substring(2, inside.length - 1);
+        } else if ((inside.startsWith('"') && inside.endsWith('"')) || (inside.startsWith("'") && inside.endsWith("'"))) {
+          inside = inside.substring(1, inside.length - 1);
+        }
+        captured.push(inside);
+      }
+
+      if (captured.length > 0) {
+        appendTerminalMessage("stdout", captured.join("\n"));
+      } else {
+        appendTerminalMessage("system", "Execution completed (Simulated Engine Mode).");
+      }
+    }
+
+    // --- EDITOR UTILITIES (INDENTATION, LINE COUNTS) ---
+    function updateLineNumbers() {
+      const text = codeEditor.value;
+      const lines = text.split("\n");
+      lineCountEl.textContent = lines.length;
+      charCountEl.textContent = text.length;
+
+      let numbersHtml = "";
+      for (let i = 1; i <= lines.length; i++) {
+        numbersHtml += `${i}<br>`;
+      }
+      lineNumbers.innerHTML = numbersHtml;
+    }
+
+    // Handle Tab key for proper Python 4-space indentation
+    codeEditor.addEventListener("keydown", (e) => {
+      // Run with Ctrl+Enter or Cmd+Enter
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        executePythonCode();
+        return;
+      }
+
+      // Tab key inserts 4 spaces
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = codeEditor.selectionStart;
+        const end = codeEditor.selectionEnd;
+        const val = codeEditor.value;
+
+        codeEditor.value = val.substring(0, start) + "    " + val.substring(end);
+        codeEditor.selectionStart = codeEditor.selectionEnd = start + 4;
+        updateLineNumbers();
+      }
+    });
+
+    codeEditor.addEventListener("input", updateLineNumbers);
+
+    // Sync line number scrolling
+    codeEditor.addEventListener("scroll", () => {
+      lineNumbers.scrollTop = codeEditor.scrollTop;
+    });
+
+    // --- BUTTON EVENT LISTENERS ---
+    runCodeBtn.addEventListener("click", executePythonCode);
+
+    clearTerminalBtn.addEventListener("click", clearTerminal);
+
+    resetCodeBtn.addEventListener("click", () => {
+      codeEditor.value = LESSONS[currentLessonIdx].starterCode;
+      updateLineNumbers();
+      appendTerminalMessage("system", "Reset editor back to initial lesson code.");
+    });
+
+    copyCodeBtn.addEventListener("click", () => {
+      // Use document.execCommand for iframe safety
+      codeEditor.select();
+      document.execCommand("copy");
+      window.getSelection().removeAllRanges();
+      
+      const origText = copyCodeBtn.textContent;
+      copyCodeBtn.textContent = "Copied!";
+      setTimeout(() => copyCodeBtn.textContent = origText, 1500);
+    });
+
+    markCompleteBtn.addEventListener("click", () => {
+      completedLessons.add(LESSONS[currentLessonIdx].id);
+      renderLessonsList();
+      appendTerminalMessage("system", `⭐ Lesson marked complete! Great work.`);
+    });
+
+    // Rosetta Stone Toggle
+    toggleRosettaBtn.addEventListener("click", () => {
+      rosettaPanel.classList.toggle("hidden");
+    });
+    closeRosettaBtn.addEventListener("click", () => {
+      rosettaPanel.classList.add("hidden");
+    });
+
+    // Quick Snippets Dropdown
+    snippetPicker.addEventListener("change", (e) => {
+      const key = e.target.value;
+      if (SNIPPETS[key]) {
+        codeEditor.value = SNIPPETS[key];
+        currentLessonTitle.textContent = `${key}_demo.py`;
+        lessonSummary.textContent = "Quick Real-World Demo";
+        lessonExplanation.textContent = "Explore this standalone snippet to see how concise Python is for real everyday tasks.";
+        updateLineNumbers();
+        appendTerminalMessage("system", `Loaded snippet: ${key}`);
+      }
+      snippetPicker.value = "";
+    });
+
+    // Mobile lesson select
+    mobileLessonSelect.addEventListener("change", (e) => {
+      loadLesson(parseInt(e.target.value, 10));
+    });
+
+    // --- APP INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderLessonsList();
+      loadLesson(0);
+      initPyodideEngine();
+    });
+  </script>
+</body>
+</html>
