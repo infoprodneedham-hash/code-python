@@ -264,7 +264,22 @@
               For JS / PHP / VB Novices
             </span>
           </h1>
-          <style>
+          
+          <p class="text-[11px] text-slate-400">Interactive WebAssembly Sandbox & Rosetta Stone</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Engine Status Indicator -->
+    <div class="hidden md:flex items-center gap-3 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
+      <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></div>
+      <span id="engineStatusText" class="text-slate-300">Initializing Python Engine (Pyodide WASM)...</span>
+      <span id="wasmBadge" class="bg-slate-800 text-slate-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-mono">WASM 3.12</span>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2">
+      <style>
  .contact-dev-btn {
       display: inline-block;
       padding: 6px 14px;
@@ -286,20 +301,6 @@
  <a href="https://support-lilac-omega.vercel.app/" target="_blank" rel="noopener noreferrer" class="contact-dev-btn">
           Contact The Dev
         </a>
-          <p class="text-[11px] text-slate-400">Interactive WebAssembly Sandbox & Rosetta Stone</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Center Engine Status Indicator -->
-    <div class="hidden md:flex items-center gap-3 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
-      <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></div>
-      <span id="engineStatusText" class="text-slate-300">Initializing Python Engine (Pyodide WASM)...</span>
-      <span id="wasmBadge" class="bg-slate-800 text-slate-400 text-[10px] px-1.5 py-0.5 rounded uppercase font-mono">WASM 3.12</span>
-    </div>
-
-    <!-- Right Controls -->
-    <div class="flex items-center gap-2">
       <!-- Quick Snippets Menu -->
       <select id="snippetPicker" class="bg-slate-800 hover:bg-slate-750 text-xs text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-sky-500">
         <option value="" disabled selected>⚡ Quick Real-World Snippets</option>
