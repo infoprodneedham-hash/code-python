@@ -74,6 +74,176 @@
     .glow-accent {
       box-shadow: 0 0 15px -3px rgba(56, 189, 248, 0.25);
     }
+
+    /* --- AFFILIATE DRAWER STYLES --- */
+    .aff-toggle-btn {
+      position: fixed;
+      bottom: 0;
+      right: 24px;
+      background: #111827;
+      color: #f3f4f6;
+      border: 1px solid #374151;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .aff-toggle-btn:hover {
+      background: #1f2937;
+      color: #60a5fa;
+    }
+    .aff-toggle-arrow {
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+    .aff-toggle-btn:hover .aff-toggle-arrow {
+      transform: translateY(-2px);
+    }
+
+    .aff-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s;
+    }
+    .aff-backdrop.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .aff-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-height: 82vh;
+      background: #0f172a;
+      color: #f8fafc;
+      border-top: 1px solid #1e293b;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.7);
+      z-index: 70;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+    }
+    .aff-drawer.is-open {
+      transform: translateY(0);
+    }
+
+    .aff-handle {
+      width: 38px;
+      height: 4px;
+      background: #334155;
+      border-radius: 999px;
+      margin: 10px auto 2px;
+    }
+
+    .aff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px 14px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .aff-header h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.01em;
+    }
+    .aff-close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .aff-close-btn:hover {
+      color: #f8fafc;
+    }
+
+    .aff-list {
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .aff-card {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    }
+    .aff-card:hover {
+      background: #243248;
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+    .aff-card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 6px;
+    }
+    .aff-card-title svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+      transition: transform 0.2s;
+    }
+    .aff-card:hover .aff-card-title svg {
+      transform: translate(2px, -2px);
+      opacity: 1;
+    }
+    .aff-card-desc {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    .aff-footer {
+      padding: 12px 24px;
+      border-top: 1px solid #1e293b;
+      font-size: 11px;
+      text-align: center;
+      color: #64748b;
+      background: #0b1120;
+    }
   </style>
 </head>
 
@@ -164,7 +334,7 @@
       </div>
 
       <!-- Rosetta Stone Drawer (Side-by-side JS / PHP / VB comparison) -->
-      <div id="rosettaPanel" class="bg-slate-900 border-b border-slate-800 p-3 transition-all duration-300">
+      <div id="rosettaPanel" class="bg-slate-900 border-b border-slate-800 p-3 transition-all duration-300 hidden">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="text-xs font-semibold uppercase text-sky-400 tracking-wider flex items-center gap-1.5">
@@ -233,7 +403,7 @@
           <!-- Code Input Workspace -->
           <div class="flex-1 flex overflow-hidden relative font-mono text-sm">
             <!-- Line numbers display -->
-            <div id="lineNumbers" class="w-10 bg-slate-900/40 text-slate-600 select-none py-3 text-right pr-2 font-mono text-xs border-r border-slate-800/80 select-none hidden sm:block overflow-hidden leading-6">
+            <div id="lineNumbers" class="w-10 bg-slate-900/40 text-slate-600 select-none py-3 text-right pr-2 font-mono text-xs border-r border-slate-800/80 hidden sm:block overflow-hidden leading-6">
               1<br>2<br>3<br>4<br>5
             </div>
             <!-- Interactive Textarea -->
@@ -261,7 +431,6 @@
           <!-- Terminal Window Header -->
           <div class="bg-slate-900/90 px-3 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-2">
-              <!-- Window dots -->
               <div class="flex items-center gap-1.5 mr-1">
                 <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
@@ -318,6 +487,67 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= AFFILIATE BOTTOM DRAWER COMPONENT ================= -->
+  <!-- Floating Trigger Tab -->
+  <button class="aff-toggle-btn" id="affToggleBtn" aria-label="Open Featured Apps">
+    <span class="aff-toggle-arrow">▲</span>
+    <span>Featured Tools</span>
+  </button>
+
+  <!-- Overlay Backdrop -->
+  <div class="aff-backdrop" id="affBackdrop"></div>
+
+  <!-- Bottom Drawer Surface -->
+  <aside class="aff-drawer" id="affDrawer" aria-hidden="true">
+    <div class="aff-handle"></div>
+    <div class="aff-header">
+      <h3>Recommended Developer & Creator Tools</h3>
+      <button class="aff-close-btn" id="affCloseBtn" aria-label="Close drawer">✕</button>
+    </div>
+
+    <div class="aff-list">
+      <!-- Concept Prompt Gen -->
+      <a href="https://conceptpromptgen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
+        <div class="aff-card-title">
+          <span>ConceptPromptGen</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        </div>
+        <p class="aff-card-desc">Rapidly draft, refine, and structure creative concept prompts tailored for high-quality generative AI results.</p>
+      </a>
+
+      <!-- Web Template Gen -->
+      <a href="https://webtemplategen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
+        <div class="aff-card-title">
+          <span>WebTemplateGen</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        </div>
+        <p class="aff-card-desc">Instantly produce clean, ready-to-deploy web layouts and responsive UI code boilerplate.</p>
+      </a>
+
+      <!-- Character Prompt Gen -->
+      <a href="https://characterpromptgen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
+        <div class="aff-card-title">
+          <span>CharacterPromptGen</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        </div>
+        <p class="aff-card-desc">Build detailed character descriptions, distinct visual traits, and consistent stylistic prompts for AI models.</p>
+      </a>
+
+      <!-- Design Pro Flow -->
+      <a href="https://designproflow.app" target="_blank" rel="noopener noreferrer" class="aff-card">
+        <div class="aff-card-title">
+          <span>DesignProFlow</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        </div>
+        <p class="aff-card-desc">Streamline design-to-production workflows with structured UI kits, component palettes, and asset flows.</p>
+      </a>
+    </div>
+
+    <div class="aff-footer">
+      Explore the creator productivity suite
+    </div>
+  </aside>
 
   <!-- JavaScript Logic Application -->
   <script>
@@ -384,7 +614,7 @@ print(f"Stock Status: {'Available for dispatch' if in_stock else 'Backordered'}"
         id: "lists-dicts",
         title: "3. Lists & Dictionaries",
         shortDesc: "Lists are like JS arrays. Dictionaries are like JSON objects or PHP associative arrays.",
-        explanation: "Python's `list` = JavaScript Array `[]`. Python's `dict` = JavaScript Object `{}` or PHP associative array. Python also has 'list comprehensions' to filter and transform lists in one line.",
+        explanation: "Python's list = JavaScript Array []. Python's dict = JavaScript Object {} or PHP associative array. Python also has 'list comprehensions' to filter and transform lists in one line.",
         rosetta: {
           topic: "Collections: Arrays vs Lists, Objects vs Dicts",
           js: `// JS: Array & Object\nconst fruits = ["Apple", "Berry"];\nfruits.push("Cherry");\n\nconst user = { name: "Sam", age: 28 };\nconsole.log(user.name);`,
@@ -638,9 +868,6 @@ print(f"Average:     {average:.1f}")
 print(f"Range:       {lowest} to {highest}")
 `,
       dictLookup: `# Quick Demo: Safe Dictionary Lookups
-# In Python, accessing a missing key with dict['missing'] throws a KeyError.
-# Using .get() allows safe fallbacks (just like optional chaining in JS)!
-
 user_profile = {"username": "coder42", "verified": True}
 
 # Safely check preferences without crashing if missing:
@@ -654,10 +881,10 @@ print(f"Notifications: {notifications}")
 import math
 
 val = 1234.56789
-print(f"Currency:       \${val:,.2f}")
-print(f"Padded digits:  {42:05d}")
-print(f"Pi to 4 places: {math.pi:.4f}")
-print(f"Percentage:     {0.8425:.1%}")
+print(f"Currency:        \${val:,.2f}")
+print(f"Padded digits:   {42:05d}")
+print(f"Pi to 4 places:  {math.pi:.4f}")
+print(f"Percentage:      {0.8425:.1%}")
 `
     };
 
@@ -832,12 +1059,10 @@ print(f"Percentage:     {0.8425:.1%}")
 
       const startTime = performance.now();
 
-      // Clear or add separator in terminal
       appendTerminalMessage("system", `▶ Running code (${new Date().toLocaleTimeString()})...`);
 
       try {
         if (pyodideInstance) {
-          // 1. Python wrapper script to safely intercept stdout/stderr in WebAssembly
           await pyodideInstance.runPythonAsync(`
 import sys
 import io
@@ -858,14 +1083,11 @@ sys.stdout = __sys_stdout_buf
 sys.stderr = __sys_stderr_buf
 `);
 
-          // 2. Execute user code
           let result = await pyodideInstance.runPythonAsync(code);
 
-          // 3. Extract captured stdout & stderr
           const stdoutList = pyodideInstance.runPython("__sys_stdout_buf.outputs.copy()").toJs();
           const stderrList = pyodideInstance.runPython("__sys_stderr_buf.outputs.copy()").toJs();
 
-          // Reset buffers
           pyodideInstance.runPython("__sys_stdout_buf.outputs.clear(); __sys_stderr_buf.outputs.clear()");
 
           const stdoutText = stdoutList.join("");
@@ -883,7 +1105,6 @@ sys.stderr = __sys_stderr_buf
             appendTerminalMessage("system", "(Code executed successfully with no print output).");
           }
 
-          // Evaluate return value inspector
           if (result !== undefined) {
             const resultStr = String(result);
             inspectorOutput.textContent = resultStr;
@@ -894,12 +1115,10 @@ sys.stderr = __sys_stderr_buf
           }
 
         } else {
-          // Fallback simulation (lightweight mock executor if Pyodide CDN is blocked)
           await simulatePythonExecution(code);
         }
 
       } catch (err) {
-        // Clean up common Python syntax error displays for beginners
         appendTerminalMessage("error", `Traceback (most recent call last):\n${err.message || err}`);
         inspectorOutput.textContent = "Error during execution";
         returnTypeBadge.textContent = "Exception";
@@ -911,7 +1130,6 @@ sys.stderr = __sys_stderr_buf
       }
     }
 
-    // Fallback simulation if WASM is offline
     async function simulatePythonExecution(code) {
       await new Promise(r => setTimeout(r, 200));
       const printRegex = /print\((.*?)\)/g;
@@ -920,7 +1138,6 @@ sys.stderr = __sys_stderr_buf
 
       while ((match = printRegex.exec(code)) !== null) {
         let inside = match[1].trim();
-        // Simple strip of f-string quotes for fallback preview
         if (inside.startsWith('f"') || inside.startsWith("f'")) {
           inside = inside.substring(2, inside.length - 1);
         } else if ((inside.startsWith('"') && inside.endsWith('"')) || (inside.startsWith("'") && inside.endsWith("'"))) {
@@ -950,16 +1167,13 @@ sys.stderr = __sys_stderr_buf
       lineNumbers.innerHTML = numbersHtml;
     }
 
-    // Handle Tab key for proper Python 4-space indentation
     codeEditor.addEventListener("keydown", (e) => {
-      // Run with Ctrl+Enter or Cmd+Enter
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         executePythonCode();
         return;
       }
 
-      // Tab key inserts 4 spaces
       if (e.key === "Tab") {
         e.preventDefault();
         const start = codeEditor.selectionStart;
@@ -974,14 +1188,12 @@ sys.stderr = __sys_stderr_buf
 
     codeEditor.addEventListener("input", updateLineNumbers);
 
-    // Sync line number scrolling
     codeEditor.addEventListener("scroll", () => {
       lineNumbers.scrollTop = codeEditor.scrollTop;
     });
 
     // --- BUTTON EVENT LISTENERS ---
     runCodeBtn.addEventListener("click", executePythonCode);
-
     clearTerminalBtn.addEventListener("click", clearTerminal);
 
     resetCodeBtn.addEventListener("click", () => {
@@ -991,7 +1203,6 @@ sys.stderr = __sys_stderr_buf
     });
 
     copyCodeBtn.addEventListener("click", () => {
-      // Use document.execCommand for iframe safety
       codeEditor.select();
       document.execCommand("copy");
       window.getSelection().removeAllRanges();
@@ -1007,7 +1218,6 @@ sys.stderr = __sys_stderr_buf
       appendTerminalMessage("system", `⭐ Lesson marked complete! Great work.`);
     });
 
-    // Rosetta Stone Toggle
     toggleRosettaBtn.addEventListener("click", () => {
       rosettaPanel.classList.toggle("hidden");
     });
@@ -1015,7 +1225,6 @@ sys.stderr = __sys_stderr_buf
       rosettaPanel.classList.add("hidden");
     });
 
-    // Quick Snippets Dropdown
     snippetPicker.addEventListener("change", (e) => {
       const key = e.target.value;
       if (SNIPPETS[key]) {
@@ -1029,10 +1238,43 @@ sys.stderr = __sys_stderr_buf
       snippetPicker.value = "";
     });
 
-    // Mobile lesson select
     mobileLessonSelect.addEventListener("change", (e) => {
       loadLesson(parseInt(e.target.value, 10));
     });
+
+    // --- AFFILIATE DRAWER CONTROLS ---
+    (function initAffiliateDrawer() {
+      const toggleBtn = document.getElementById('affToggleBtn');
+      const closeBtn = document.getElementById('affCloseBtn');
+      const backdrop = document.getElementById('affBackdrop');
+      const drawer = document.getElementById('affDrawer');
+
+      function openDrawer() {
+        drawer.classList.add('is-open');
+        backdrop.classList.add('is-open');
+        drawer.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeDrawer() {
+        drawer.classList.remove('is-open');
+        backdrop.classList.remove('is-open');
+        drawer.setAttribute('aria-hidden', 'true');
+      }
+
+      toggleBtn.addEventListener('click', openDrawer);
+      closeBtn.addEventListener('click', closeDrawer);
+      backdrop.addEventListener('click', closeDrawer);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+          closeDrawer();
+        }
+      });
+
+      // Global window hook for triggering drawer programmatically
+      window.openAffiliateDrawer = openDrawer;
+      window.closeAffiliateDrawer = closeDrawer;
+    })();
 
     // --- APP INITIALIZATION ---
     window.addEventListener("DOMContentLoaded", () => {
@@ -1041,282 +1283,5 @@ sys.stderr = __sys_stderr_buf
       initPyodideEngine();
     });
   </script>
-  <!-- ================= START: AFFILIATE / ECOSYSTEM BOTTOM DRAWER ================= -->
-<style>
-  /* Floating Toggle Tab at Bottom */
-  .aff-toggle-btn {
-    position: fixed;
-    bottom: 0;
-    right: 24px;
-    background: #111827;
-    color: #f3f4f6;
-    border: 1px solid #374151;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    padding: 10px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
-    z-index: 99998;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s, transform 0.2s;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  .aff-toggle-btn:hover {
-    background: #1f2937;
-    color: #60a5fa;
-  }
-  .aff-toggle-arrow {
-    font-size: 10px;
-    transition: transform 0.2s;
-  }
-  .aff-toggle-btn:hover .aff-toggle-arrow {
-    transform: translateY(-2px);
-  }
-
-  /* Overlay Backdrop */
-  .aff-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(3px);
-    z-index: 99999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s;
-  }
-  .aff-backdrop.is-open {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  /* Slide-Up Bottom Drawer */
-  .aff-drawer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    max-height: 82vh;
-    background: #0f172a;
-    color: #f8fafc;
-    border-top: 1px solid #1e293b;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
-    z-index: 100000;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    box-sizing: border-box;
-  }
-  .aff-drawer * {
-    box-sizing: border-box;
-  }
-  .aff-drawer.is-open {
-    transform: translateY(0);
-  }
-
-  /* Drag / Visual Indicator Bar */
-  .aff-handle {
-    width: 38px;
-    height: 4px;
-    background: #334155;
-    border-radius: 999px;
-    margin: 10px auto 2px;
-  }
-
-  /* Header */
-  .aff-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px 14px;
-    border-bottom: 1px solid #1e293b;
-  }
-  .aff-header h3 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 700;
-    color: #f1f5f9;
-    letter-spacing: -0.01em;
-  }
-  .aff-close-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-    border-radius: 4px;
-    transition: color 0.15s;
-  }
-  .aff-close-btn:hover {
-    color: #f8fafc;
-  }
-
-  /* Content Cards (Grid layout on medium/large screens) */
-  .aff-list {
-    padding: 20px 24px;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  .aff-card {
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 14px 16px;
-    transition: border-color 0.2s, transform 0.15s, background 0.2s;
-  }
-  .aff-card:hover {
-    background: #243248;
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-  }
-  .aff-card-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    font-weight: 600;
-    color: #60a5fa;
-    margin-bottom: 6px;
-  }
-  .aff-card-title svg {
-    width: 14px;
-    height: 14px;
-    opacity: 0.7;
-    transition: transform 0.2s;
-  }
-  .aff-card:hover .aff-card-title svg {
-    transform: translate(2px, -2px);
-    opacity: 1;
-  }
-  .aff-card-desc {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.45;
-    color: #cbd5e1;
-  }
-
-  /* Footer */
-  .aff-footer {
-    padding: 12px 24px;
-    border-top: 1px solid #1e293b;
-    font-size: 11px;
-    text-align: center;
-    color: #64748b;
-    background: #0b1120;
-  }
-</style>
-
-<!-- Trigger Button -->
-<button class="aff-toggle-btn" id="affToggleBtn" aria-label="Open Featured Apps">
-  <span class="aff-toggle-arrow">▲</span>
-  <span>Featured Tools</span>
-</button>
-
-<!-- Backdrop -->
-<div class="aff-backdrop" id="affBackdrop"></div>
-
-<!-- Drawer Container -->
-<aside class="aff-drawer" id="affDrawer" aria-hidden="true">
-  <div class="aff-handle"></div>
-  <div class="aff-header">
-    <h3>Recommended Tools</h3>
-    <button class="aff-close-btn" id="affCloseBtn" aria-label="Close drawer">✕</button>
-  </div>
-
-  <div class="aff-list">
-    <!-- Concept Prompt Gen -->
-    <a href="https://conceptpromptgen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
-      <div class="aff-card-title">
-        <span>ConceptPromptGen</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-      </div>
-      <p class="aff-card-desc">Rapidly draft, refine, and structure creative concept prompts tailored for high-quality generative AI results.</p>
-    </a>
-
-    <!-- Web Template Gen -->
-    <a href="https://webtemplategen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
-      <div class="aff-card-title">
-        <span>WebTemplateGen</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-      </div>
-      <p class="aff-card-desc">Instantly produce clean, ready-to-deploy web layouts and responsive UI code boilerplate.</p>
-    </a>
-
-    <!-- Character Prompt Gen -->
-    <a href="https://characterpromptgen.app" target="_blank" rel="noopener noreferrer" class="aff-card">
-      <div class="aff-card-title">
-        <span>CharacterPromptGen</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-      </div>
-      <p class="aff-card-desc">Build detailed character descriptions, distinct visual traits, and consistent stylistic prompts for AI models.</p>
-    </a>
-
-    <!-- Design Pro Flow -->
-    <a href="https://designproflow.app" target="_blank" rel="noopener noreferrer" class="aff-card">
-      <div class="aff-card-title">
-        <span>DesignProFlow</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-      </div>
-      <p class="aff-card-desc">Streamline design-to-production workflows with structured UI kits, component palettes, and asset flows.</p>
-    </a>
-  </div>
-
-  <div class="aff-footer">
-    Explore the creator productivity suite
-  </div>
-</aside>
-
-<script>
-  (function () {
-    const toggleBtn = document.getElementById('affToggleBtn');
-    const closeBtn = document.getElementById('affCloseBtn');
-    const backdrop = document.getElementById('affBackdrop');
-    const drawer = document.getElementById('affDrawer');
-
-    function openDrawer() {
-      drawer.classList.add('is-open');
-      backdrop.classList.add('is-open');
-      drawer.setAttribute('aria-hidden', 'false');
-    }
-
-    function closeDrawer() {
-      drawer.classList.remove('is-open');
-      backdrop.classList.remove('is-open');
-      drawer.setAttribute('aria-hidden', 'true');
-    }
-
-    toggleBtn.addEventListener('click', openDrawer);
-    closeBtn.addEventListener('click', closeDrawer);
-    backdrop.addEventListener('click', closeDrawer);
-
-    // Close on Escape key
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
-        closeDrawer();
-      }
-    });
-
-    // Global hook for programmatically opening the drawer (e.g., after dismissing a modal)
-    window.openAffiliateDrawer = openDrawer;
-  })();
-</script>
-<!-- ================= END: AFFILIATE / ECOSYSTEM BOTTOM DRAWER ================= -->
 </body>
 </html>
